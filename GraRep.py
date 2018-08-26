@@ -7,10 +7,19 @@ import sys
 import argparse
 import math
 
-
+def parse_input():
+    parser = argparse.ArgumentParser(description='Input embedding method and graph name.')
+    parser.add_argument('-g','--graph_filename', metavar = '', type=str, default = 'HomoSapiens.adj' , help='Path to graph edgelist')
+    parser.add_argument('-e','--embedding_filename', metavar = '', type=str, default = 'emb/HomoSapiens.emb' , help='Path to file containing embeddings')
+    parser.add_argument('-d', '--dimension', metavar = '', type=int, default = 100 , help='Embedding dimension')
+    parser.add_argument('--K', metavar = '', type=int, default = 5 , help='Number of transition steps')
+    parser.add_argument('-b', '--beta', metavar = '', type=float, default = 1.0 , help='Bias parameter')
+    parser.add_argument('--directed', metavar = '', type=bool, default = False, help ='Set true to treat graph as directed' )
+    args = parser.parse_args() 
+    return args.graph_filename, args.embedding_filename, args.dimension, args.K, args.beta, args.directed
 
 def get_graph(graph_filename, directed):
-
+    #Parse graph fro edgelist and prepare probability transition matrix
     print('Loading graph..')
     edges = np.genfromtxt(graph_filename, delimiter = '/t')
     if len(edges.shape)<2:
@@ -51,6 +60,7 @@ def get_graph(graph_filename, directed):
     return A
 
 def get_representations(A,K,beta):
+    #Extract list of similarity matrices to be factorized
 
     print('Computing representations')
     A_temp = []
@@ -77,6 +87,8 @@ def get_representations(A,K,beta):
     return X_rep
 
 def get_embeddings(X_rep,N,dimension,K):
+    #Factorize (SVD) and concatenate similarity matrices
+
     print('Extracting embeddings..')
     E = np.ndarray( (N,dimension) )
  
@@ -94,18 +106,6 @@ def get_embeddings(X_rep,N,dimension,K):
         E[:, width*(k+1)+mod : width*(k+2)+mod] = U @ np.power(np.diag(S), 0.5)
 
     return E    
-
-def parse_input():
-    parser = argparse.ArgumentParser(description='Input embedding method and graph name.')
-    parser.add_argument('-g','--graph_filename', metavar = '', type=str, default = 'HomoSapiens.adj' , help='Path to graph edgelist')
-    parser.add_argument('-e','--embedding_filename', metavar = '', type=str, default = 'emb/HomoSapiens.emb' , help='Path to file containing embeddings')
-    parser.add_argument('-d', '--dimension', metavar = '', type=int, default = 100 , help='Embedding dimension')
-    parser.add_argument('--K', metavar = '', type=int, default = 5 , help='Number of transition steps')
-    parser.add_argument('-b', '--beta', metavar = '', type=float, default = 1.0 , help='Bias parameter')
-    parser.add_argument('--directed', metavar = '', type=bool, default = False, help ='Set true to treat graph as directed' )
-    args = parser.parse_args() 
-    return args.graph_filename, args.embedding_filename, args.dimension, args.K, args.beta, args.directed
-
 
 def main():    
 
