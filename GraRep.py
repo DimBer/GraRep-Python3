@@ -1,3 +1,6 @@
+# Dimitris Berberidis 
+# University of Minnesota 2018
+
 from scipy.sparse import lil_matrix
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import svds 
